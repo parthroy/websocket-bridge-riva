@@ -1,0 +1,7 @@
+# Python Client Requirements for Riva WebSocket Bridge
+websockets>=11.0.3
+asyncio
+wave
+numpy
+ssl
+logging
