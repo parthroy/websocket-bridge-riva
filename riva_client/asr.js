@@ -11,7 +11,7 @@ const { request } = require('express');
 
 
 const defaultRate = 16000;
-const languageCode = 'en-US';
+const languageCode = 'en-hi';
 const { Transform } = require('stream');
 
 var protoRoot = __dirname + '/protos/riva/proto/';
@@ -50,8 +50,31 @@ class RivaASRClient {
              languageCode ='en-US',
              encoding = Encodings.LINEAR_PCM,
              maxAlts = 1,
-             punctuate = true)   {
-        this.asrClient = new rasr.RivaSpeechRecognition(process.env.RIVA_API_URL, grpc.credentials.createInsecure());
+             punctuate = true,
+             rivaHost = null,
+             rivaPort = null)   {
+        
+        // Build gRPC URL dynamically
+        let grpcUrl;
+        if (rivaHost && rivaPort) {
+            grpcUrl = `${rivaHost}:${rivaPort}`;
+            console.log('🎯 Using dynamic Riva connection:', grpcUrl);
+        } else if (rivaHost) {
+            grpcUrl = `${rivaHost}:50051`; // Default port if only host provided
+            console.log('🎯 Using dynamic Riva host with default port:', grpcUrl);
+        } else {
+            grpcUrl = process.env.RIVA_API_URL || 'localhost:50051';
+            console.log('🎯 Using default Riva connection:', grpcUrl);
+        }
+        
+        try {
+            this.asrClient = new rasr.RivaSpeechRecognition(grpcUrl, grpc.credentials.createInsecure());
+            console.log('✅ gRPC client created successfully for:', grpcUrl);
+        } catch (error) {
+            console.error('❌ Failed to create gRPC client for:', grpcUrl, error.message);
+            throw error;
+        }
+        
         this.firstRequest = {
             streaming_config: {
                 config: {
@@ -65,6 +88,7 @@ class RivaASRClient {
             }
         };
         this.numCharsPrinted = 0;
+        console.log('🔧 ASR configured - Language:', languageCode, 'SampleRate:', sampleRateHz, 'Encoding:', encoding);
         return true;
     }
 

@@ -15,7 +15,7 @@ class RivaASRClient {
         }
     }
     setupASR(sampleRateHz = 1600,
-             languageCode ='en-US',
+             languageCode ='en-hi',
              encoding = 2,
              maxAlts = 1,
              punctuate = true) {

@@ -171,7 +171,7 @@ message AnalyzeIntentOptions {
   // appropriate intent classifier (if it exists)
   string domain = 3;
 
-  // Optional language field. Assumed to be "en-US" if not specified.
+  // Optional language field. Assumed to be "en-hi" if not specified.
   string lang = 4;
 }
 
@@ -208,7 +208,7 @@ message AnalyzeIntentResponse {
 // AnalyzeEntitiesOptions is an optional configuration message to be sent as part of
 // an AnalyzeEntitiesRequest with query metadata
 message AnalyzeEntitiesOptions {
-  // Optional language field. Assumed to be "en-US" if not specified.
+  // Optional language field. Assumed to be "en-hi" if not specified.
   string lang = 4;
 }
 

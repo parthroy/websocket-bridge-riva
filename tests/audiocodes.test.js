@@ -29,7 +29,7 @@ describe('audioCodes protocol impl test suite - client messages', () => {
     test('start message', () => {
         var data = {
             "type": "start",
-            "language": "en-US",
+            "language": "en-hi",
             "format": "raw",
             "encoding": "LINEAR16",
             "sampleRateHz": 1600
@@ -50,6 +50,23 @@ describe('audioCodes protocol impl test suite - client messages', () => {
         let ws = new WebSocket('wss://localhost:8009');
         audioCodesControlMessage(JSON.stringify(data), asr, ws);
         expect(ws.getMessages()[0]).toBe('{"type":"end","reason":"stop by client"}');
+    });
+
+    test('start message with dynamic Riva connection', () => {
+        var data = {
+            "type": "start",
+            "language": "en-US",
+            "format": "raw",
+            "encoding": "LINEAR16",
+            "sampleRateHz": 16000,
+            "rivaHost": "custom-riva.example.com",
+            "rivaPort": 50052
+        };
+
+        let asr = new RivaASRClient();
+        let ws = new WebSocket('wss://localhost:8009');
+        audioCodesControlMessage(JSON.stringify(data), asr, ws);
+        expect(ws.getMessages()[0]).toBe('{"type":"started"}');
     });
 
     test('start message server', async () => {
@@ -74,7 +91,7 @@ describe('audioCodes protocol impl test suite - client messages', () => {
      test('binary message - after start', async () => {
         var data = {
             "type": "start",
-            "language": "en-US",
+            "language": "en-hi",
             "format": "raw",
             "encoding": "LINEAR16",
             "sampleRateHz": 1600
@@ -104,7 +121,7 @@ describe('audioCodes protocol impl test suite - client messages', () => {
     test('binary message - after stop', async () => {
     var data = {
             "type": "start",
-            "language": "en-US",
+            "language": "en-hi",
             "format": "raw",
             "encoding": "LINEAR16",
             "sampleRateHz": 1600

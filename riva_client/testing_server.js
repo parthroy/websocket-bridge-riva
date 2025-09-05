@@ -92,7 +92,7 @@ server.bindAsync(uri, grpc.ServerCredentials.createInsecure(), () => {
       custom_configuration: {},
       encoding: 'LINEAR_PCM',
       sample_rate_hertz: 16000,
-      language_code: 'en-US',
+      language_code: 'en-hi',
       max_alternatives: 1,
       audio_channel_count: 0,
       enable_word_time_offsets: false,

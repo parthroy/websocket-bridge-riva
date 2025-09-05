@@ -60,18 +60,40 @@ function transcription_cb(result, ws) {
 async function audioCodesControlMessage(data, asr, ws) {
     let msg_data = JSON.parse(data);
     if (msg_data.type === "start") {
-        asr.setupASR(msg_data.sampleRateHz, msg_data.language);
+        console.log('🎬 Processing start message with config:', {
+            language: msg_data.language,
+            sampleRateHz: msg_data.sampleRateHz,
+            encoding: msg_data.encoding,
+            rivaHost: msg_data.rivaHost,
+            rivaPort: msg_data.rivaPort
+        });
+        
+        // Extract Riva connection parameters
+        const rivaHost = msg_data.rivaHost || null;
+        const rivaPort = msg_data.rivaPort || null;
+        
+        // Setup ASR with dynamic connection parameters
+        asr.setupASR(
+            msg_data.sampleRateHz, 
+            msg_data.language, 
+            msg_data.encoding,
+            1, // maxAlts
+            true, // punctuate
+            rivaHost,
+            rivaPort
+        );
 
         try {
             asr.mainASR(function transcription_cbh(result) { transcription_cb(result, ws) });
         } catch (Error){
-            console.log("Riva server not responding, please check configs.  Nothing to do - failing.");
+            console.log("❌ Riva server not responding, please check configs.  Nothing to do - failing.");
             console.log(Error);
             ws.send(JSON.stringify({ "type": "end", "reason": "RIVA service unavailable" }));
             return stateOf.STOPPED;
         }
 
-        ws.send(JSON.stringify({ "type": "started" }))    ;
+        ws.send(JSON.stringify({ "type": "started" }));
+        console.log('✅ ASR session started successfully');
         return stateOf.STARTED;
     } else if (msg_data.type === 'stop') {
         ws.send(JSON.stringify({ "type": "end", "reason": "stop by client" }));

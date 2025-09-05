@@ -67,8 +67,34 @@ function startRivaService() {
 
         websocket.addEventListener('open', function (evt) {
             console.log('WebSocket Client Connected');
-            start_asr = { "type": "start", "language": "en-US", "format": "raw", "encoding": "LINEAR16", "sampleRateHz": 16000 };
-            console.log(JSON.stringify(start_asr));
+            
+            // Get Riva connection parameters from form inputs or URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const rivaHost = document.getElementById('rivaHost').value || urlParams.get('rivaHost') || null;
+            const rivaPort = document.getElementById('rivaPort').value || urlParams.get('rivaPort') || null;
+            const language = document.getElementById('language').value || urlParams.get('language') || 'en-US';
+            const sampleRate = parseInt(document.getElementById('sampleRate').value) || parseInt(urlParams.get('sampleRate')) || 16000;
+            const encoding = document.getElementById('encoding').value || urlParams.get('encoding') || 'LINEAR16';
+            
+            start_asr = { 
+                "type": "start", 
+                "language": language, 
+                "format": "raw", 
+                "encoding": encoding, 
+                "sampleRateHz": sampleRate
+            };
+            
+            // Add Riva connection parameters if provided
+            if (rivaHost && rivaHost.trim() !== '') {
+                start_asr.rivaHost = rivaHost.trim();
+                console.log('🎯 Using custom Riva host:', rivaHost);
+            }
+            if (rivaPort && rivaPort.trim() !== '') {
+                start_asr.rivaPort = parseInt(rivaPort);
+                console.log('🎯 Using custom Riva port:', rivaPort);
+            }
+            
+            console.log('📤 Sending start message:', JSON.stringify(start_asr));
             websocket.send(JSON.stringify(start_asr));
         });
 
@@ -249,6 +275,53 @@ function setAudioEnabled(enabled) {
 }
 
 // ---------------------------------------------------------------------------------------
+// Load configuration from URL parameters on page load
+// ---------------------------------------------------------------------------------------
+function loadConfigFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    if (urlParams.get('rivaHost')) {
+        document.getElementById('rivaHost').value = urlParams.get('rivaHost');
+    }
+    if (urlParams.get('rivaPort')) {
+        document.getElementById('rivaPort').value = urlParams.get('rivaPort');
+    }
+    if (urlParams.get('language')) {
+        document.getElementById('language').value = urlParams.get('language');
+    }
+    if (urlParams.get('sampleRate')) {
+        document.getElementById('sampleRate').value = urlParams.get('sampleRate');
+    }
+    if (urlParams.get('encoding')) {
+        document.getElementById('encoding').value = urlParams.get('encoding');
+    }
+}
+
+// ---------------------------------------------------------------------------------------
+// Update URL with current configuration
+// ---------------------------------------------------------------------------------------
+function updateUrlWithConfig() {
+    const urlParams = new URLSearchParams();
+    
+    const rivaHost = document.getElementById('rivaHost').value;
+    const rivaPort = document.getElementById('rivaPort').value;
+    const language = document.getElementById('language').value;
+    const sampleRate = document.getElementById('sampleRate').value;
+    const encoding = document.getElementById('encoding').value;
+    
+    if (rivaHost) urlParams.set('rivaHost', rivaHost);
+    if (rivaPort) urlParams.set('rivaPort', rivaPort);
+    if (language && language !== 'en-US') urlParams.set('language', language);
+    if (sampleRate && sampleRate !== '16000') urlParams.set('sampleRate', sampleRate);
+    if (encoding && encoding !== 'LINEAR16') urlParams.set('encoding', encoding);
+    
+    const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+    window.history.replaceState({}, '', newUrl);
+    
+    console.log('🔄 Configuration updated in URL');
+}
+
+// ---------------------------------------------------------------------------------------
 // On clicking the Transcription button, start Riva
 // ---------------------------------------------------------------------------------------
 $(document).on("click", "#riva-btn", function (e) {
@@ -257,6 +330,22 @@ $(document).on("click", "#riva-btn", function (e) {
 
 $(document).on("click", "#riva-btn-stop", function (e) {
     stopRivaService();
+});
+
+// ---------------------------------------------------------------------------------------
+// On clicking the Update Config button
+// ---------------------------------------------------------------------------------------
+$(document).on("click", "#updateConfig", function (e) {
+    updateUrlWithConfig();
+    toastr.info('Configuration updated! Changes will apply on next ASR session start.', 'Config Updated');
+});
+
+// ---------------------------------------------------------------------------------------
+// Load configuration on page load
+// ---------------------------------------------------------------------------------------
+$(document).ready(function() {
+    loadConfigFromUrl();
+    console.log('📋 Configuration loaded from URL parameters');
 });
 
 $(document).on("click", "#mute-btn", function (e) {

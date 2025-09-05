@@ -6,4 +6,4 @@
 require('dotenv').config({ path: 'env.txt' });
 
 const defaultRate = 16000;
-const languageCode = 'en-US';
+const languageCode = 'en-hi';
