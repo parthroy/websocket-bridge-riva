@@ -21,7 +21,7 @@ var ws = new WebSocket(ws_server, {rejectUnauthorized: false});
 let count = 0;
 ws.on('open', async function start() {
     console.log("connected to server");
-    start_asr = { "type": "start", "language": "en-hi", "format": "raw", "encoding": "LINEAR16", "sampleRateHz": 16000 };
+    start_asr = { "type": "start", "language": "en-hi", "format": "raw", "encoding": "LINEAR16", "sampleRateHz": 24000 };
     ws.send(JSON.stringify(start_asr));
 });
 ws.on('close', function (result) {

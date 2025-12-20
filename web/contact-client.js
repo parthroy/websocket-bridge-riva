@@ -59,7 +59,7 @@ function startRivaService() {
     latencyTimer = new LatencyTimer();
 
     if (websocket == null || websocket.readyState !== WebSocket.OPEN) {
-        websocket = new WebSocket('wss://' + location.host);
+        websocket = new WebSocket('ws://' + location.host);
 
         let audioInput = audio_context.createMediaStreamSource(localStream);
         let bufferSize = 4096;
@@ -70,8 +70,7 @@ function startRivaService() {
             
             // Get Riva connection parameters from form inputs or URL parameters
             const urlParams = new URLSearchParams(window.location.search);
-            const rivaHost = document.getElementById('rivaHost').value || urlParams.get('rivaHost') || null;
-            const rivaPort = document.getElementById('rivaPort').value || urlParams.get('rivaPort') || null;
+            const rivaUrl = document.getElementById('rivaUrl').value || urlParams.get('rivaUrl') || null;
             const language = document.getElementById('language').value || urlParams.get('language') || 'en-US';
             const sampleRate = parseInt(document.getElementById('sampleRate').value) || parseInt(urlParams.get('sampleRate')) || 16000;
             const encoding = document.getElementById('encoding').value || urlParams.get('encoding') || 'LINEAR16';
@@ -84,14 +83,17 @@ function startRivaService() {
                 "sampleRateHz": sampleRate
             };
             
-            // Add Riva connection parameters if provided
-            if (rivaHost && rivaHost.trim() !== '') {
-                start_asr.rivaHost = rivaHost.trim();
-                console.log('🎯 Using custom Riva host:', rivaHost);
-            }
-            if (rivaPort && rivaPort.trim() !== '') {
-                start_asr.rivaPort = parseInt(rivaPort);
-                console.log('🎯 Using custom Riva port:', rivaPort);
+            // Parse and add Riva URL if provided
+            if (rivaUrl && rivaUrl.trim() !== '') {
+                const parsedRiva = parseRivaUrl(rivaUrl.trim());
+                if (parsedRiva.host) {
+                    start_asr.rivaHost = parsedRiva.host;
+                    console.log('🎯 Using custom Riva host:', parsedRiva.host);
+                }
+                if (parsedRiva.port) {
+                    start_asr.rivaPort = parsedRiva.port;
+                    console.log('🎯 Using custom Riva port:', parsedRiva.port);
+                }
             }
             
             console.log('📤 Sending start message:', JSON.stringify(start_asr));
@@ -275,16 +277,39 @@ function setAudioEnabled(enabled) {
 }
 
 // ---------------------------------------------------------------------------------------
+// Parse Riva URL into host and port components
+// ---------------------------------------------------------------------------------------
+function parseRivaUrl(rivaUrl) {
+    try {
+        if (rivaUrl.includes(':')) {
+            const parts = rivaUrl.split(':');
+            const host = parts[0];
+            const port = parseInt(parts[1]);
+            
+            if (isNaN(port) || port <= 0 || port > 65535) {
+                console.warn('⚠️ Invalid port number in Riva URL:', rivaUrl);
+                return { host: host, port: null };
+            }
+            
+            return { host: host, port: port };
+        } else {
+            // No port specified, use default
+            return { host: rivaUrl, port: 50051 };
+        }
+    } catch (error) {
+        console.error('❌ Error parsing Riva URL:', rivaUrl, error);
+        return { host: null, port: null };
+    }
+}
+
+// ---------------------------------------------------------------------------------------
 // Load configuration from URL parameters on page load
 // ---------------------------------------------------------------------------------------
 function loadConfigFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
     
-    if (urlParams.get('rivaHost')) {
-        document.getElementById('rivaHost').value = urlParams.get('rivaHost');
-    }
-    if (urlParams.get('rivaPort')) {
-        document.getElementById('rivaPort').value = urlParams.get('rivaPort');
+    if (urlParams.get('rivaUrl')) {
+        document.getElementById('rivaUrl').value = urlParams.get('rivaUrl');
     }
     if (urlParams.get('language')) {
         document.getElementById('language').value = urlParams.get('language');
@@ -303,14 +328,12 @@ function loadConfigFromUrl() {
 function updateUrlWithConfig() {
     const urlParams = new URLSearchParams();
     
-    const rivaHost = document.getElementById('rivaHost').value;
-    const rivaPort = document.getElementById('rivaPort').value;
+    const rivaUrl = document.getElementById('rivaUrl').value;
     const language = document.getElementById('language').value;
     const sampleRate = document.getElementById('sampleRate').value;
     const encoding = document.getElementById('encoding').value;
     
-    if (rivaHost) urlParams.set('rivaHost', rivaHost);
-    if (rivaPort) urlParams.set('rivaPort', rivaPort);
+    if (rivaUrl) urlParams.set('rivaUrl', rivaUrl);
     if (language && language !== 'en-US') urlParams.set('language', language);
     if (sampleRate && sampleRate !== '16000') urlParams.set('sampleRate', sampleRate);
     if (encoding && encoding !== 'LINEAR16') urlParams.set('encoding', encoding);
@@ -370,4 +393,20 @@ $(document).on("click", "#mute-btn", function (e) {
     }
 });
 
+// ---------------------------------------------------------------------------------------
+// Clear Configuration Button - Reset Riva URL to use server defaults
+// ---------------------------------------------------------------------------------------
+$(document).ready(function() {
+    $('#clearConfig').click(function() {
+        console.log('🗑️ Clearing Riva configuration');
+        document.getElementById('rivaUrl').value = '';
+        updateUrlWithConfig();
+    });
+});
 
+// ---------------------------------------------------------------------------------------
+// Load configuration when page loads
+// ---------------------------------------------------------------------------------------
+$(document).ready(function() {
+    loadConfigFromUrl();
+});

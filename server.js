@@ -8,7 +8,7 @@ require('dotenv').config({ path: 'env.txt' });
 const WebSocket = require('ws');
 const path = require('path');
 const fs = require('fs');
-const https = require('https');
+const https = require('http');
 const express = require('express');
 
 const { audioCodesControlMessage, wsServerConnection, wsServerClose }  = require('./modules/audiocodes');
@@ -47,10 +47,7 @@ function setupServer() {
         const certData = fs.readFileSync(sslcert);
         console.log('✅ SSL certificates loaded successfully');
         
-        server = https.createServer({
-            key: keyData,
-            cert: certData
-        }, app);
+        server = https.createServer(app);
         console.log('✅ HTTPS server created');
     } catch (error) {
         console.error('❌ Failed to load SSL certificates:', error.message);

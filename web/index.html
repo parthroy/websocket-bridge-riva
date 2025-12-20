@@ -45,12 +45,9 @@ SPDX-License-Identifier: MIT
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-3">
-                                <label for="rivaHost" class="form-label">Riva Host:</label>
-                                <input type="text" class="form-control" id="rivaHost" placeholder="localhost">
-                            </div>
-                            <div class="col-md-2">
-                                <label for="rivaPort" class="form-label">Riva Port:</label>
-                                <input type="number" class="form-control" id="rivaPort" placeholder="50051">
+                                <label for="rivaUrl" class="form-label">Riva URL:</label>
+                                <input type="text" class="form-control" id="rivaUrl" placeholder="riva-server.com:50051">
+                                <small class="text-muted">Format: hostname:port or just hostname (uses port 50051)</small>
                             </div>
                             <div class="col-md-2">
                                 <label for="language" class="form-label">Language:</label>
@@ -62,7 +59,6 @@ SPDX-License-Identifier: MIT
                                     <option value="de-DE">German</option>
                                     <option value="hi-IN">Hindi</option>
                                     <option value="en-hi">Hinglish</option>
-
                                 </select>
                             </div>
                             <div class="col-md-2">
@@ -70,7 +66,7 @@ SPDX-License-Identifier: MIT
                                 <select class="form-control" id="sampleRate">
                                     <option value="8000">8000 Hz</option>
                                     <option value="16000" selected>16000 Hz</option>
-                                    <option value="22050">22050 Hz</option>
+                                    <option value="24000">24000 Hz</option>
                                     <option value="44100">44100 Hz</option>
                                 </select>
                             </div>
@@ -83,14 +79,20 @@ SPDX-License-Identifier: MIT
                                     <option value="FLAC">FLAC</option>
                                 </select>
                             </div>
-                            <div class="col-md-1 d-flex align-items-end">
+                            <div class="col-md-2 d-flex align-items-end">
                                 <button id="updateConfig" class="btn btn-info btn-sm w-100">Update</button>
+                            </div>
+                            <div class="col-md-1 d-flex align-items-end">
+                                <button id="clearConfig" class="btn btn-outline-secondary btn-sm w-100" title="Clear Riva URL to use server defaults">Clear</button>
                             </div>
                         </div>
                         <div class="row mt-2">
                             <div class="col-12">
-                                <small class="text-muted">💡 Leave Riva Host/Port empty to use server defaults. Click
-                                    Update to apply changes.</small>
+                                <small class="text-muted">💡 Leave Riva URL empty to use server defaults. Examples: 
+                                    <code>riva.company.com:50052</code>, 
+                                    <code>10.0.1.100:50051</code>, 
+                                    <code>localhost:50051</code>
+                                </small>
                             </div>
                         </div>
                     </div>

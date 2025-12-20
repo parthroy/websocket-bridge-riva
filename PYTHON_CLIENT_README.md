@@ -39,8 +39,7 @@ async def main():
     # With custom Riva server
     results = await client.connect_and_transcribe(
         audio_data,
-        riva_host="your-riva-server.com",
-        riva_port=50052,
+        riva_url="your-riva-server.com:50052",
         language="es-ES"
     )
 
@@ -60,8 +59,7 @@ client = SyncRivaClient()
 # Transcribe audio (blocking call)
 results = client.transcribe_audio(
     audio_data,
-    riva_host="your-riva-server.com",  # Optional
-    riva_port=50052,                   # Optional
+    riva_url="your-riva-server.com:50052",  # URL format
     language="en-US",
     sample_rate=16000,
     encoding="LINEAR16"
@@ -81,8 +79,7 @@ import asyncio
 async def main():
     client = RivaWebSocketClient(
         ws_url="wss://your-bridge.com:8009",
-        riva_host="your-riva-server.com",
-        riva_port=50052,
+        riva_url="your-riva-server.com:50052",  # URL format
         language="en-US",
         sample_rate=16000,
         encoding="LINEAR16"
@@ -116,15 +113,20 @@ client = SomeClient(
 ### Dynamic Riva Connection
 
 ```python
-# These parameters are sent in the "start" message
+# URL format examples
 results = client.transcribe_audio(
     audio_data,
-    riva_host="riva-server.example.com",  # Custom Riva host
-    riva_port=50052,                      # Custom Riva port
-    language="en-US",                     # Language code
-    sample_rate=16000,                    # Audio sample rate
-    encoding="LINEAR16"                   # Audio encoding
+    riva_url="riva-server.example.com:50052",  # Complete URL with port
+    language="en-US",
+    sample_rate=16000,
+    encoding="LINEAR16"
 )
+
+# Supported URL formats:
+# riva_url="localhost:50051"           # Host with port
+# riva_url="riva.company.com:50052"    # Domain with custom port  
+# riva_url="10.0.1.100:50051"          # IP address with port
+# riva_url="riva-server.example.com"   # Domain only (uses default port 50051)
 ```
 
 ### Supported Languages
@@ -282,7 +284,7 @@ class YourApp:
     async def process_audio(self, audio_bytes):
         transcripts = await self.riva_client.connect_and_transcribe(
             audio_bytes,
-            riva_host=self.config.riva_host,
+            riva_url=self.config.riva_url,  # e.g., "riva-server.com:50051"
             language=self.config.language
         )
         return transcripts
@@ -301,7 +303,7 @@ class YourApp:
     def process_audio(self, audio_bytes):
         transcripts = self.riva_client.transcribe_audio(
             audio_bytes,
-            riva_host=self.config.riva_host,
+            riva_url=self.config.riva_url,  # e.g., "riva-server.com:50051"
             language=self.config.language
         )
         return transcripts
@@ -342,15 +344,18 @@ with wave.open("your_audio.wav", 'rb') as w:
 
 ### Riva Server Issues
 ```python
-# Test with default Riva (don't set rivaHost/rivaPort)
+### Riva Server Issues
+
+```python
+# Test with default Riva (don't set riva_url)
 results = client.transcribe_audio(audio_data)
 
 # Test with custom Riva
 results = client.transcribe_audio(
     audio_data, 
-    riva_host="your-riva", 
-    riva_port=50051
+    riva_url="your-riva-server:50051"
 )
+```
 ```
 
 ## 📞 Support
